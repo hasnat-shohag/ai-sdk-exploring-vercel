@@ -18,9 +18,7 @@ export default function ChatInterface() {
 
 	return (
 		<div className='h-screen flex flex-col bg-gradient-to-br font-sans'>
-			{/* Header */}
-
-			<div className='flex-1 overflow-y-auto p-6'>
+			<div className='flex-1 overflow-y-auto p-6 mx-20'>
 				{error && <div className='text-red-500'>{error?.message}</div>}
 				{isLoading && !completion && <div>Loading...</div>}
 				{completion && <div>{completion}</div>}
@@ -34,7 +32,7 @@ export default function ChatInterface() {
 						setInput("");
 						handleSubmit();
 					}}
-					className='flex gap-3 items-center'
+					className='flex gap-3 items-center mx-20'
 				>
 					<input
 						type='text'

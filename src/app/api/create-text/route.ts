@@ -1,5 +1,5 @@
 import { generateText } from "ai";
-import { google } from "@/app/api/common";
+import { google } from "@ai-sdk/google";
 
 export async function POST(req: Request) {
 	// Create Google provider instance with API key

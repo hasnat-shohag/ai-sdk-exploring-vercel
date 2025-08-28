@@ -1,5 +1,5 @@
+import { google } from "@ai-sdk/google";
 import { streamText } from "ai";
-import { google } from "@/app/api/common";
 
 export async function POST(req: Request) {
 	try {
