@@ -1,11 +1,11 @@
 "use client";
 import { useChat } from "@ai-sdk/react";
-import { Pause } from "lucide-react";
+import { Loader, Pause } from "lucide-react";
 import { useState } from "react";
 
 export default function ChatInterface() {
 	const [input, setInput] = useState("");
-	const { messages, error, isLoading, sendMessage } = useChat();
+	const { messages, error, status, sendMessage } = useChat();
 
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -17,21 +17,27 @@ export default function ChatInterface() {
 		<div className='h-screen flex flex-col bg-gradient-to-br font-sans'>
 			<div className='flex-1 overflow-y-auto p-6 mx-20'>
 				{error && <div className='text-red-500'>{error?.message}</div>}
+
 				{messages && (
 					<div>
 						{messages.map((msg) => (
 							<div key={msg.id} className='my-2'>
-								<span>{msg.role === "assistant" ? "AI" : "User"}</span>
-
-								{msg.parts?.map((part, index) => (
-									<span key={index}>{part?.text}</span>
-								))}
+								<span className='block font-medium text-lg'>
+									{msg.role === "assistant" ? "AI" : "User"}
+								</span>
+								{msg?.parts?.map((part, index) => {
+									if (part?.type == "text") {
+										return <pre key={index}>{part?.text}</pre>;
+									}
+									return null;
+								})}
 							</div>
 						))}
 					</div>
 				)}
-				{/* {isLoading && !completion && <div>Loading...</div>}
-				{completion && <div>{completion}</div>} */}
+				{status === "submitted" && (
+					<Loader className='animate-spin'>...</Loader>
+				)}
 			</div>
 
 			{/* Input Form */}
@@ -50,7 +56,7 @@ export default function ChatInterface() {
 						onChange={(e) => setInput(e.target.value)}
 						placeholder='Type your message...'
 						className='flex-1 px-5 py-3.5 bg-white/10 border-2 border-white/20 rounded-full text-white placeholder-white/70 text-base outline-none transition-all duration-300 backdrop-blur-md focus:border-white/40 focus:bg-white/15 disabled:opacity-50'
-						disabled={isLoading}
+						disabled={status === "streaming" || status === "submitted"}
 					/>
 					<button
 						type='submit'
@@ -61,7 +67,7 @@ export default function ChatInterface() {
 								: "bg-gradient-to-br from-purple-400 to-purple-600 text-white hover:shadow-lg hover:scale-105 cursor-pointer"
 						}`}
 					>
-						{isLoading ? (
+						{status === "streaming" || status === "submitted" ? (
 							<>
 								<span className='animate-pulse' onClick={stop}>
 									<Pause />
