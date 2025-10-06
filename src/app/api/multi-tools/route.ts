@@ -11,6 +11,21 @@ import {
 import { z } from "zod";
 
 const tools = {
+	getLocation: tool({
+		description:
+			"Get the city location for a user by name. Use this BEFORE getWeather if the query mentions a person (e.g., 'mun' or 'hasnat').",
+		inputSchema: z.object({
+			name: z.string().describe("the name of the user"),
+		}),
+		execute: async ({ name }) => {
+			if (name === "mun") {
+				return "rajshahi";
+			} else if (name === "hasnat") {
+				return "dhaka";
+			} else return "Unknown";
+		},
+	}),
+
 	getWeather: tool({
 		description: "Get the weather for a location",
 		inputSchema: z.object({
@@ -30,13 +45,13 @@ export type ChatMessage = UIMessage<never, UIDataTypes, ChatTools>;
 
 export async function POST(req: Request) {
 	try {
-		const { messages }: { messages: UIMessage[] } = await req.json();
+		const { messages }: { messages: ChatMessage[] } = await req.json();
 
 		const result = streamText({
 			model: google("gemini-2.0-flash"),
 			messages: convertToModelMessages(messages),
 			tools,
-			stopWhen: stepCountIs(2),
+			stopWhen: stepCountIs(5),
 		});
 
 		return result.toUIMessageStreamResponse();

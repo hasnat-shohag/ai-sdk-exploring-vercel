@@ -1,5 +1,5 @@
 "use client";
-import { ChatMessage } from "@/app/api/tools/route";
+import { ChatMessage } from "@/app/api/multi-tools/route";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { Loader, Pause } from "lucide-react";
@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
 export default function ToolInterface() {
 	const [input, setInput] = useState("");
 	const { messages, error, status, sendMessage, stop } = useChat<ChatMessage>({
-		transport: new DefaultChatTransport({ api: "/api/tools" }),
+		transport: new DefaultChatTransport({ api: "/api/multi-tools" }),
 	});
 
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -44,9 +44,9 @@ export default function ToolInterface() {
 												: "bg-amber-50/10 text-right"
 										}`}
 									>
-										<span className='block font-medium text-lg mb-1'>
+										{/* <span className='block font-medium text-lg mb-1'>
 											{msg.role === "assistant" ? "AI" : "User"}
-										</span>
+										</span> */}
 										{msg?.parts?.map((part, index) => {
 											switch (part.type) {
 												case "text":
@@ -55,6 +55,80 @@ export default function ToolInterface() {
 															{part.text}
 														</div>
 													);
+												case "tool-getLocation":
+													switch (part.state) {
+														case "input-streaming":
+															return (
+																<div
+																	key={index}
+																	className='p-3 rounded-2xl text-sm text-yellow-300 flex items-center gap-2'
+																>
+																	<Loader className='w-4 h-4 animate-spin' />
+																	<span>
+																		<span className='font-semibold'>Tool:</span>{" "}
+																		{part.type.replace("tool-", "")} → Receiving
+																		input...
+																	</span>
+																</div>
+															);
+
+														case "input-available":
+															return (
+																<div
+																	key={index}
+																	className='p-3 rounded-2xl text-sm text-blue-300'
+																>
+																	<span className='font-semibold'>Tool:</span>{" "}
+																	{part.type.replace("tool-", "")}
+																	<br />
+																	<span className='text-blue-200'>
+																		Input: {JSON.stringify(part.input)}
+																	</span>
+																</div>
+															);
+
+														case "output-available":
+															return (
+																<div
+																	key={index}
+																	className='p-3 rounded-2xl text-sm text-green-300'
+																>
+																	<span className='font-semibold'>
+																		✅ Tool:
+																	</span>{" "}
+																	{part.type.replace("tool-", "")}
+																	<br />
+																	<span className='text-green-200'>
+																		Input: {JSON.stringify(part.input)}
+																	</span>
+																	<br />
+																	<span className='text-green-100'>
+																		Output: {JSON.stringify(part.output)}
+																	</span>
+																</div>
+															);
+
+														case "output-error":
+															return (
+																<div
+																	key={index}
+																	className='p-3 rounded-2xl bg-red-500/10 border border-red-400/20 text-sm text-red-300 flex items-center gap-2'
+																>
+																	<Pause className='w-4 h-4' />
+																	<span>
+																		<span className='font-semibold'>
+																			Error in tool:
+																		</span>{" "}
+																		{part.type.replace("tool-", "")}
+																		<br />
+																		<span>{part.errorText}</span>
+																	</span>
+																</div>
+															);
+
+														default:
+															return null;
+													}
 												case "tool-getWeather":
 													switch (part.state) {
 														case "input-streaming":
