@@ -1,5 +1,5 @@
 "use client";
-import { ChatMessage } from "@/app/api/tools/route";
+import { ChatMessage } from "@/app/api/api-tool/route";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { Loader, Pause } from "lucide-react";
